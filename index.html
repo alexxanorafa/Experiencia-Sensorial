@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>Intervalo de Luz – Experiência Sensorial</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Uma experiência interativa de luz, sombra e intervalo. Explore camadas de significado através do movimento.">
+  <meta name="theme-color" content="#050308">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚬</text></svg>">
+</head>
+<body>
+  <!-- Sistema de Partículas (Canvas) -->
+  <canvas id="particleCanvas"></canvas>
+  
+  <!-- Camadas de Profundidade -->
+  <div class="camadas">
+    <div class="camada camada-fundo" id="dynamicBg"></div>
+    <div class="camada camada-meio"></div>
+    <div class="camada camada-frente"></div>
+  </div>
+  
+  <!-- Menu Superior -->
+  <nav class="menu-superior">
+    <div class="menu-container">
+      <a href="#" class="logo">
+        <span class="logo-simbolo">⚬</span>
+        <span class="logo-texto">Intervalo de Luz</span>
+      </a>
+      
+      <div class="menu-direita">
+        <button class="btn-imersao" id="btnImersao" aria-label="Modo imersão total">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+        
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Overlay do Menu -->
+  <div class="menu-overlay" id="menuOverlay">
+    <div class="menu-overlay-conteudo">
+      <div class="menu-header">
+        <h2>Galeria de Experiências</h2>
+        <p class="menu-subtitulo">Explore outras jornadas sensoriais</p>
+      </div>
+      
+      <div class="projetos-grid" id="projetosGrid">
+        <!-- Projetos carregados dinamicamente -->
+      </div>
+      
+      <div class="menu-footer">
+        <button class="btn-exportar" id="btnExportar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Exportar Minha Jornada
+        </button>
+        
+        <div class="info-sessao">
+          <span id="contadorFragmentos">0 fragmentos descobertos</span>
+          <span id="tempoSessao">há 0 minutos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <main class="conteudo-principal">
+    <!-- Painel de Controle -->
+    <section class="painel-controle">
+      <div class="controle-grupo">
+        <label class="controle-legenda">Caminho</label>
+        <div class="grupo-botoes" id="controlesCaminho">
+          <button class="controle-btn ativo" data-caminho="luz" aria-pressed="true">
+            <span class="controle-icone">◉</span> Luz
+          </button>
+          <button class="controle-btn" data-caminho="sombra" aria-pressed="false">
+            <span class="controle-icone">◎</span> Sombra
+          </button>
+          <button class="controle-btn" data-caminho="intervalo" aria-pressed="false">
+            <span class="controle-icone">⦾</span> Intervalo
+          </button>
+        </div>
+      </div>
+      
+      <div class="controle-grupo">
+        <label class="controle-legenda">Estado</label>
+        <div class="grupo-botoes" id="controlesEstado">
+          <button class="controle-btn ativo" data-estado="silencio" aria-pressed="true">
+            <span class="controle-icone">⎔</span> Silêncio
+          </button>
+          <button class="controle-btn" data-estado="fluxo" aria-pressed="false">
+            <span class="controle-icone">⌒</span> Fluxo
+          </button>
+          <button class="controle-btn" data-estado="intensidade" aria-pressed="false">
+            <span class="controle-icone">⚡</span> Intensidade
+          </button>
+        </div>
+      </div>
+      
+      <div class="dica-controle">
+        <p>Movimente o cursor para explorar as camadas de luz. Cada gesto revela novas dimensões.</p>
+      </div>
+    </section>
+
+    <!-- Cena Central -->
+    <div class="cena-container">
+      <div class="cena" id="cenaPrincipal">
+        <!-- Halo de Luz -->
+        <div class="halo-luz" id="haloLuz"></div>
+        
+        <!-- Sistema de Órbitas -->
+        <div class="sistema-orbital">
+          <div class="orbita orbita-externa" id="orbitaExterna">
+            <div class="traco-orbita"></div>
+          </div>
+          <div class="orbita orbita-interna" id="orbitaInterna">
+            <div class="traco-orbita"></div>
+          </div>
+          <div class="nucleo-central" id="nucleoCentral">
+            <div class="nucleo-ponto"></div>
+            <div class="nucleo-aura"></div>
+          </div>
+        </div>
+        
+        <!-- Fragmentos de Texto -->
+        <div class="fragmentos-container">
+          <div class="fragmento fragmento-1" id="fragmento1"></div>
+          <div class="fragmento fragmento-2" id="fragmento2"></div>
+          <div class="fragmento fragmento-3" id="fragmento3"></div>
+        </div>
+        
+        <!-- Pontos de Interação -->
+        <button class="ponto-interacao ponto-1" data-secreto="1" aria-label="Descobrir fragmento oculto 1">
+          <span class="ponto-dot"></span>
+          <span class="ponto-aura"></span>
+        </button>
+        <button class="ponto-interacao ponto-2" data-secreto="2" aria-label="Descobrir fragmento oculto 2">
+          <span class="ponto-dot"></span>
+          <span class="ponto-aura"></span>
+        </button>
+        <button class="ponto-interacao ponto-3" data-secreto="3" aria-label="Descobrir fragmento oculto 3">
+          <span class="ponto-dot"></span>
+          <span class="ponto-aura"></span>
+        </button>
+        <button class="ponto-interacao ponto-4" data-secreto="4" aria-label="Descobrir fragmento oculto 4">
+          <span class="ponto-dot"></span>
+          <span class="ponto-aura"></span>
+        </button>
+        
+        <!-- Controle Central -->
+        <div class="controle-central">
+          <button class="btn-ciclo" id="btnCiclo" aria-label="Revelar novo fragmento">
+            <span class="btn-ciclo-simbolo">⟳</span>
+            <span class="btn-ciclo-texto">Novo Intervalo</span>
+          </button>
+        </div>
+        
+        <!-- Oráculo Sensorial -->
+        <div class="oraculo-sensorial" id="oraculoSensorial">
+          <div class="oraculo-conteudo">
+            <p class="oraculo-texto" id="oraculoTexto">O campo observa o teu primeiro gesto.</p>
+            <div class="oraculo-indicador">
+              <div class="indicador-velocidade" id="indicadorVelocidade"></div>
+              <span class="indicador-texto" id="indicadorTexto">pausa</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Painel de Memória -->
+    <aside class="painel-memoria" id="painelMemoria">
+      <div class="memoria-header">
+        <h3>Constelação Pessoal</h3>
+        <button class="btn-fechar-memoria" id="btnFecharMemoria" aria-label="Fechar painel de memória">×</button>
+      </div>
+      <div class="memoria-conteudo" id="memoriaConteudo">
+        <p class="memoria-vazia">Os fragmentos que guardares aparecerão aqui.</p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Modal de Exportação -->
+  <div class="modal" id="modalExportar">
+    <div class="modal-conteudo">
+      <div class="modal-header">
+        <h3>Exportar Minha Jornada</h3>
+        <button class="btn-fechar-modal" aria-label="Fechar modal">×</button>
+      </div>
+      <div class="modal-corpo">
+        <div class="opcao-exportacao">
+          <button class="btn-exportar-opcao" data-tipo="imagem">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <span>Imagem da Cena</span>
+          </button>
+          <button class="btn-exportar-opcao" data-tipo="texto">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Fragmentos em Texto</span>
+          </button>
+          <button class="btn-exportar-opcao" data-tipo="constelacao">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            <span>Constelação SVG</span>
+          </button>
+        </div>
+        <div class="preview-exportacao" id="previewExportacao"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sistema de Áudio -->
+  <audio id="audioAmbiente" loop>
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-forest-rain-1248.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="audioInteracao">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-magic-sparkle-300.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
